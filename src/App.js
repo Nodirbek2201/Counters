@@ -1,44 +1,72 @@
-import {createContext,useState} from "react";
-import FirstComponent from "./Components/FirstComponent";
-import SecondComponent from "./Components/SecondComponent";
-import 'bootstrap/dist/css/bootstrap.min.css'
+import {createContext, useReducer} from "react";
+import Title from "./Components/Title";
+import AddTask from "./Components/AddTask";
+import AllTasks from "./Components/AllTasks";
 
+import 'bootstrap/dist/css/bootstrap.min.css'
 
 export const MyContext = createContext()
 
-function App(){
+function reducer(state,action){
 
-    const [counters, setCounters] = useState({
-        counter1:0,
-        counter2:0,
-        counter3:0,
-        counter4:0
+    switch (action.type){
+       case 'setTasks': return {...state, tasks:action.value}
+        default:return state
+    }
+
+}
+
+function App() {
+
+    const [state, dispatch] = useReducer(reducer,{
+        tasks:[
+            {
+                name:'Task 1',
+                status:true
+            }
+        ]
     })
 
-  return(
-      <MyContext.Provider value={{counters,setCounters}}>
-      <div className={'container'}>
-            <div className="row">
-                <div className="col-md-12">
-                    <div className="card">
+    function addNewTask(value) {
+        let a = {
+            name:value,
+            status:false
+        }
+        state.tasks.push(a)
+        dispatch({
+            type:'setTasks',
+            value:state.tasks
+        })
+    }
+
+    function taskIsActive(index){
+        let a = [...state.tasks]
+        a[index].status = !a[index].status
+        dispatch({
+            type:'setTasks',
+            value:a
+        })
+    }
+
+    return (
+        <MyContext.Provider  value={state.tasks}>
+        <div className={'container'}>
+            <div className="row justify-content-center mt-5">
+                <div className="col-md-8">
+                    <div className="card text-center">
                         <div className="card-header">
-                            <h1 className={'text-center'}>Plus or Minus</h1>
+                            <Title/>
                         </div>
                         <div className="card-body">
-                            <div className="row justify-content-around">
-                                <div className="col-md-5">
-                                    <FirstComponent/>
-                                </div>
-                                <div className="col-md-5">
-                                    <SecondComponent/>
-                                </div>
-                            </div>
+                            <AddTask addNewTask={addNewTask}/>
+                            <AllTasks taskIsActive={taskIsActive}/>
                         </div>
                     </div>
                 </div>
             </div>
-      </div>
-      </MyContext.Provider>
-  )
+        </div>
+        </MyContext.Provider>
+    )
 }
+
 export default App
